@@ -20,7 +20,7 @@ In your web page:
   
         var result = $.abSignificance(
             {
-                resultType: 'significant',
+                resultType: 'all',
                 control: {
                     'label': 'Control A',
                     'hits': 16,
@@ -29,7 +29,7 @@ In your web page:
                 treatment: {
                     'label': 'Treatment A',
                     'hits': 16,
-                    'conversions': 8
+                    'conversions': 16
                 },
                 conversionRateOptions: {
                     'percentage': true,
@@ -43,6 +43,7 @@ In your web page:
                 }
             }
         );
+        
   });
   
   });
