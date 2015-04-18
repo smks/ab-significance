@@ -17,7 +17,34 @@ In your web page:
 <script src="dist/ab-significance.min.js"></script>
 <script>
   jQuery(function ($) {
-    $.awesome(); // "awesome"
+  
+        var result = $.abSignificance(
+            {
+                resultType: 'significant',
+                control: {
+                    'label': 'Control A',
+                    'hits': 16,
+                    'conversions': 4
+                },
+                treatment: {
+                    'label': 'Treatment A',
+                    'hits': 16,
+                    'conversions': 8
+                },
+                conversionRateOptions: {
+                    'percentage': true,
+                    'decimalPlaces': 2
+                },
+                confidenceOptions: {
+                    'percentage': false,
+                    'decimalPlaces': false,
+                    'targetValue': 95,
+                    'timesHundred': false
+                }
+            }
+        );
+  });
+  
   });
 </script>
 ```

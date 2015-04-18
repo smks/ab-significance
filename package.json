@@ -1,7 +1,7 @@
 {
   "name": "ab-significance",
-  "version": "0.0.1",
-  "description": "AB Significance jQuery plugin",
+  "version": "1.0.0",
+  "description": "AB Significance jQuery plugin based on a two sided hypothesis",
   "keywords": [
     "jquery-plugin"
   ],

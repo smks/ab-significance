@@ -6,16 +6,14 @@
  * Licensed under the MIT license.
  */
 (function ($) {
+    "use strict";
 
     $.abSignificance = function (options) {
-        // Override default options with passed-in options.
-        options = $.extend({}, $.abSignificance.options, options);
 
         // Default options.
         $.abSignificance.options = {
-            resultType: 'significant',
             control: {
-                'label': 'Control',
+                'label': 'Control A',
                 'hits': 100,
                 'conversions': 50
             },
@@ -24,57 +22,70 @@
                 'hits': 100,
                 'conversions': 20
             },
+            resultType: 'all',
             conversionRateOptions: {
                 'percentage': true,
-                'decimalPoint': 2
+                'decimalPlaces': 2
             },
             confidenceOptions: {
-                'percentage': true,
-                'decimalPoint': 2,
-                'targetValue': 95
-            },
-            debugMode: false,
-            sampleSize: [20, 40]
+                'percentage': false,
+                'decimalPlaces': false,
+                'targetValue': 95,
+                'timesHundred': true
+            }
         };
+
+        // Override default options with passed-in options.
+        options = $.extend({}, $.abSignificance.options, options);
 
         // ensure converted to base 10 integers
         options.control.hits = parseInt(options.control.hits, 10);
         options.control.conversions = parseInt(options.control.conversions, 10);
-        options.treatment.conversions = parseInt(options.treatment.conversions, 10);
+        options.treatment.hits = parseInt(options.treatment.hits, 10);
         options.treatment.conversions = parseInt(options.treatment.conversions, 10);
 
         // return result based on result type option
-        switch (options.result) {
+        switch (options.resultType) {
+            case 'hits':
+                return $.abSignificance.getHits(
+                    options.control,
+                    options.treatment
+                );
+
+            case 'conversions':
+                return $.abSignificance.getConversions(
+                    options.control,
+                    options.treatment
+                );
 
             case 'confidence':
                 return $.abSignificance.calculateConfidence(
                     options.control,
                     options.treatment,
                     options.confidenceOptions.percentage,
-                    options.confidenceOptions.decimalPoint
+                    options.confidenceOptions.decimalPlaces,
+                    options.confidenceOptions.timesHundred
                 );
-                break;
 
             case 'conversionRates':
-                return $.abSignificance.calculateConversionRate(
+                return $.abSignificance.getConversionRates(
+                    options.control,
+                    options.treatment,
                     options.conversionRateOptions.percentage,
-                    options.conversionRateOptions.decimalPoint
+                    options.conversionRateOptions.decimalPlaces
                 );
-                break;
 
             case 'zScore':
                 return $.abSignificance.calcZScore(
                     options.control,
                     options.treatment
                 );
-                break;
 
             case 'pValue':
                 return $.abSignificance.calcPValue(
                     options.control,
                     options.treatment
                 );
-                break;
 
             case 'significant':
                 return $.abSignificance.calcSignificance(
@@ -84,28 +95,23 @@
                     false,
                     false
                 );
-                break;
-
-            case 'all':
-                return $.abSignificance.calculateResults(
-                    options.confidenceOptions.targetValue,
-                    options.control,
-                    options.treatment,
-                    options.confidenceOptions.percentage,
-                    options.confidenceOptions.decimalPoint
-                );
-                break;
 
             default:
-                throw new Error('AB Significance: return result not specified or does not exist');
+                return $.abSignificance.calculateResults(
+                    options.control,
+                    options.treatment,
+                    options.conversionRateOptions.percentage,
+                    options.conversionRateOptions.decimalPlaces
+                );
         }
     };
 
-    $.abSignificance.calculateResults = function (control, treatment, percentage, decimalPoint) {
+    $.abSignificance.calculateResults = function (control, treatment, percentage, decimalPlaces) {
         var results = {};
-        results.conversionRates = $.abSignificance.calculateConversionRate(percentage, decimalPoint);
+        results.conversionRates = $.abSignificance.getConversionRates(control, treatment, percentage, decimalPlaces);
         results.zScore = $.abSignificance.calcZScore(control, treatment);
         results.confidence = $.abSignificance.calculateConfidence(control, treatment, false, false);
+        results.confidencePercentage = ((results.confidence * 100).toFixed(2) + '%');
         results.pValue = $.abSignificance.getPValue(results.confidence);
         results.significant = $.abSignificance.isSignificant(results.confidence);
         return results;
@@ -114,41 +120,34 @@
     /**
      *
      * @param percentage
-     * @param decimalPoint
+     * @param decimalPlaces
      */
-    $.abSignificance.calculateConfidence = function (controlObj, treatmentObj, percentage, decimalPoint, timesHundred) {
+    $.abSignificance.calculateConfidence = function (controlObj, treatmentObj, percentage, decimalPlaces, timesHundred) {
 
         timesHundred = timesHundred || false;
 
         var zScore = $.abSignificance.calcZScore(controlObj, treatmentObj);
         var confidence = $.abSignificance.cumNorDist(zScore);
 
-        if (decimalPoint === true) {
-            confidence.toFixed(decimalPoint);
-        }
-
         if (timesHundred === true) {
             confidence = confidence * 100;
         }
 
+        if (decimalPlaces) {
+            confidence = confidence.toFixed(decimalPlaces);
+        }
+
         if (percentage === true) {
-            confidence + '%';
+            confidence += '%';
         }
 
         return confidence;
     };
 
-    /**
-     * Returns an array of the conversion rate for both control and treatment
-     *
-     * @param percentage
-     * @param decimalPoint
-     * @returns {Array}
-     */
-    $.abSignificance.calculateConversionRate = function (percentage, decimalPoint) {
-        var result = [];
-        result[$.abSignificance.options.control.label] = $.abSignificance.getControlConversionRate(percentage, decimalPoint);
-        result[$.abSignificance.options.treatment.label] = $.abSignificance.getTreatmentConversionRate(percentage, decimalPoint);
+    $.abSignificance.getConversionRates = function (control, treatment, percentage, decimalPlaces) {
+        var result = {};
+        result[control.label] = $.abSignificance.calculateConversionRate(control, percentage, decimalPlaces);
+        result[treatment.label] = $.abSignificance.calculateConversionRate(treatment, percentage, decimalPlaces);
         return result;
     };
 
@@ -156,9 +155,9 @@
      *
      * @returns {*}
      */
-    $.abSignificance.getControlConversionRate = function (percentage, decimalPoint) {
+    $.abSignificance.getControlConversionRate = function (percentage, decimalPlaces) {
         return $.abSignificance.calculateConversionRate(
-            $.abSignificance.options.control, percentage, decimalPoint
+            $.abSignificance.options.control, percentage, decimalPlaces
         );
     };
 
@@ -166,9 +165,9 @@
      *
      * @returns {*}
      */
-    $.abSignificance.getTreatmentConversionRate = function (percentage, decimalPoint) {
+    $.abSignificance.getTreatmentConversionRate = function (percentage, decimalPlaces) {
         return $.abSignificance.calculateConversionRate(
-            $.abSignificance.options.treatment, percentage, decimalPoint
+            $.abSignificance.options.treatment, percentage, decimalPlaces
         );
     };
 
@@ -177,20 +176,20 @@
      * @returns {*}
      * @param target {}
      */
-    $.abSignificance.calculateConversionRate = function (target, percentage, decimalPoint) {
+    $.abSignificance.calculateConversionRate = function (target, percentage, decimalPlaces) {
         var result;
         percentage = percentage || false;
-        decimalPoint = decimalPoint || false;
+        decimalPlaces = decimalPlaces || false;
         if (target.hits === 0 || target.conversions === 0) {
             result = 0;
         } else {
             result = (target.conversions / target.hits) * 100;
         }
-        if (decimalPoint) {
-            result.toFixed(decimalPoint);
+        if (decimalPlaces) {
+            result = result.toFixed(decimalPlaces);
         }
         if (percentage) {
-            result += percentage;
+            result += '%';
         }
         return result;
     };
@@ -239,7 +238,7 @@
             res.push(((1 - conv) * a / (bs[i] * conv)));
         }
         return res;
-    }
+    };
 
     /**
      * Calculation of score
@@ -252,7 +251,7 @@
         var s = ($.abSignificance.cr(t) * (1 - $.abSignificance.cr(t))) / t.hits +
             ($.abSignificance.cr(c) * (1 - $.abSignificance.cr(c))) / c.hits;
         return z / Math.sqrt(s);
-    }
+    };
 
     /**
      *
@@ -261,13 +260,7 @@
      * @returns {number}
      */
     $.abSignificance.calcPValue = function (control, treatment) {
-
-        var confidence;
-
-        if (confidence !== undefined) {
-            confidence = $.abSignificance.calculateConfidence(control, treatment);
-        }
-
+        var confidence = $.abSignificance.calculateConfidence(control, treatment);
         return $.abSignificance.getPValue(confidence);
     };
 
@@ -281,16 +274,42 @@
     };
 
     /**
+     *
+     * @param control
+     * @param treatment
+     * @returns {{}}
+     */
+    $.abSignificance.getHits = function (control, treatment) {
+        var results = {};
+        results[control.label] = control.hits;
+        results[treatment.label] = treatment.hits;
+        return results;
+    };
+
+    /**
+     *
+     * @param control
+     * @param treatment
+     * @returns {{}}
+     */
+    $.abSignificance.getConversions = function (control, treatment) {
+        var results = {};
+        results[control.label] = control.conversions;
+        results[treatment.label] = treatment.conversions;
+        return results;
+    };
+
+    /**
      * Returns true if comparison is significant
      *
      * @param controlObj
      * @param treatmentObj
      * @param percentage
-     * @param decimalPoint
+     * @param decimalPlaces
      * @returns {boolean}
      */
-    $.abSignificance.calcSignificance = function (targetValue, controlObj, treatmentObj, percentage, decimalPoint) {
-        var confidence = $.abSignificance.calculateConfidence(controlObj, treatmentObj, percentage, decimalPoint);
+    $.abSignificance.calcSignificance = function (targetValue, controlObj, treatmentObj, percentage, decimalPlaces) {
+        var confidence = $.abSignificance.calculateConfidence(controlObj, treatmentObj, percentage, decimalPlaces, true);
         return $.abSignificance.isSignificant(confidence);
     };
 
@@ -300,7 +319,7 @@
         }
 
         return false;
-    }
+    };
 
     /**
      * Calculation of conversion rate
@@ -309,6 +328,6 @@
      */
     $.abSignificance.cr = function (t) {
         return t.conversions / t.hits;
-    }
+    };
 
 }(jQuery));

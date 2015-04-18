@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AB Significance jQuery plugin Test Suite</title>
+    <!-- Load local jQuery. -->
+    <script src="../bower_components/jquery/dist/jquery.js"></script>
+    <!-- Load local lib and tests. -->
+    <script src="../dist/jquery.ab-significance.min.js"></script>
+</head>
+<body>
+<h1>Open Console</h1>
+
+<h4>jQuery Available Options:</h4>
+<pre>
+var fixture = {
+    resultType: 'significant',
+    control: {
+        'label': 'Control A',
+        'hits': 16,
+        'conversions': 4
+    },
+    treatment: {
+        'label': 'Treatment A',
+        'hits': 16,
+        'conversions': 8
+    },
+    conversionRateOptions: {
+        'percentage': true,
+        'decimalPlaces': 2
+    },
+    confidenceOptions: {
+        'percentage': false,
+        'decimalPlaces': false,
+        'targetValue': 95,
+        'timesHundred': false
+    }
+};
+</pre>
+
+<h4>Example usage:</h4>
+<pre>var result = $.abSignificance(fixture);</pre>
+</body>
+</html>
