@@ -59,14 +59,25 @@ console.log($.abSignificance(options));
 // returns P Value
 options.resultType = P_VALUE;
 console.log($.abSignificance(options));
-// outputs: 8.16496580927726
+// outputs: 0.014195849665686433
 
 // returns true/false
 options.resultType = SIGNIFICANT;
 console.log($.abSignificance(options));
-// outputs: 0.014195849665686433
+// outputs: true (is significant)
 
 // returns object of all
 options.resultType = ALL;
 console.log($.abSignificance(options));
-// outputs: true (is significant)
+/**
+ * outputs: Object
+ *  {
+ *      conversionRates: {Control A: "16.67%", Treatment A: "21.43%"},
+ *      confidence: 0.9858041503343136,
+ *      confidencePercentage: "98.58%",
+ *      pValue: 0.014195849665686433,
+ *      significant: false,
+ *      zScore: 2.1918297870204775
+ *  }
+ *
+ */
