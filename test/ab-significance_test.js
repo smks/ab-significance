@@ -2,7 +2,7 @@
     module('jQuery.abSignificance');
 
     var fixture = {
-        resultType: 'significant',
+        resultType: 'conversions',
         control: {
             'label': 'Control A',
             'hits': 16,
@@ -26,10 +26,10 @@
     };
 
     var hitsFixture = jQuery.extend({}, fixture);
-    hitsFixture.result = 'hits';
+    hitsFixture.resultType = 'hits';
 
     var confidenceFixture = jQuery.extend({}, fixture);
-    confidenceFixture.result = 'confidence';
+    confidenceFixture.resultType = 'confidence';
 
     test('AB Significance - Test Suite', function () {
 
@@ -38,7 +38,7 @@
         /*****************************************************
          * Hits Tests
          ****************************************************/
-        fixture.result = 'hits';
+        fixture.resultType = 'hits';
         var hits = $.abSignificance(fixture);
         // we are returning a confidence value
         propEqual(hits, {
@@ -56,7 +56,7 @@
          *  Conversions Tests
          ****************************************************/
 
-        fixture.result = 'conversions';
+        fixture.resultType = 'conversions';
         var conversions = $.abSignificance(fixture);
         propEqual(conversions, {
             'Control A': 4,
@@ -113,7 +113,7 @@
          * Conversion Rate Tests
          ****************************************************/
 
-        fixture.result = 'conversionRates';
+        fixture.resultType = 'conversionRates';
         fixture.conversionRateOptions.decimalPlaces = false;
         fixture.conversionRateOptions.percentage = false;
         fixture.control.hits = 100;
@@ -152,7 +152,7 @@
          *  zScore Tests
          ****************************************************/
 
-        fixture.result = 'zScore';
+        fixture.resultType = 'zScore';
         var zScore = $.abSignificance(fixture);
         equal(zScore, 3.7796447300922718, 'Z-Score - should return correct Z-Score');
 
@@ -166,7 +166,7 @@
          *  pValue Tests
          ****************************************************/
 
-        fixture.result = 'pValue';
+        fixture.resultType = 'pValue';
         fixture.control.hits = 600;
         fixture.control.conversions = 100;
         fixture.treatment.hits = 700;
@@ -186,7 +186,7 @@
          *  Is Significant Tests
          ****************************************************/
 
-        fixture.result = 'significant';
+        fixture.resultType = 'significant';
 
         // Pass in significant results and test true
         equal($.abSignificance(fixture), true,
@@ -213,7 +213,7 @@
          *  Full Results Tests
          ****************************************************/
 
-        fixture.result = 'all';
+        fixture.resultType = 'all';
         fixture = $.abSignificance.options;
 
         fixture.control.hits = 100;
@@ -242,5 +242,8 @@
         /*****************************************************
          * End of Significant Tests
          ****************************************************/
+
+        /* _________________________________________________________________________________ */
     });
+
 }(jQuery));

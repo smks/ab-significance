@@ -1,9 +1,20 @@
 {
   "name": "ab-significance",
-  "version": "0.0.1",
+  "authors": [
+    "Shaun Michael K. Stone", "Shaun Stone <shaunmstone@gmail.com>"
+  ],
+  "homepage": "http://www.smks.co.uk",
+  "description": "Calculate the significance between Control and Treatment tests",
+  "ignore": "test",
+  "main": ["dist/jquery.ab-significance.min.js"],
+  "version": "1.0.0",
   "dependencies": {},
   "devDependencies": {
     "qunit": "~1.12.0",
     "jquery": "~2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/SMKS/ab-significance.git"
   }
 }
