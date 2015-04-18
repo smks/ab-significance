@@ -1,0 +1,25 @@
+{
+  "name": "abSignificance",
+  "version": "1.0.0",
+  "title": "jquery.abSignificance",
+  "author": {
+    "name": "Shaun Michael K. Stone",
+    "email": "shaunmstone@gmail.com",
+    "url": "http://www.smks.co.uk"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    }
+  ],
+  "dependencies": {
+    "jquery": "*"
+  },
+  "description": "AB Significance jQuery plugin based on a two sided hypothesis",
+  "keywords": [
+    "jquery-plugin"
+  ],
+  "demo": "https://github.com/SMKS/ab-significance",
+  "homepage": "https://github.com/SMKS/ab-significance"
+}
