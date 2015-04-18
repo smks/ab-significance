@@ -2,8 +2,6 @@
 
 > jQuery plugin that calculates the Significance, Z Score, P Value, Conversion rate and overall result of Control and Treatments for AB Testing
 
-![alt tag](https://www.dropbox.com/s/6g6wlth2ggs0o27/AB-QUnit.JPG?dl=0)
-
 ## Getting Started
 
 In your web page:
