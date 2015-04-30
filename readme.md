@@ -4,6 +4,8 @@
 
 ## Getting Started
 
+Ensure to run grunt after cloning repo.  This will generate the minified version of significance in directory 'dist'.
+
 In your web page:
 
 ```html
